@@ -1,6 +1,6 @@
 # MultiAttributedString
 
-`MultiAttributedString` is a Swift library that allows you to create `NSAttributedString` objects with multiple text attributes applied to different parts of a string based on user-defined symbol delimiters.
+`MultiAttributedString` allows you to create `NSAttributedString` with multiple text attributes applied to different parts of a string based on user-defined symbol delimiters.
 
 ## Features
 
@@ -16,7 +16,7 @@
 You can add `MultiAttributedString` to your project using Swift Package Manager (SPM):
 
 1. In Xcode, go to "File" > "Swift Packages" > "Add Package Dependency..."
-2. Enter the repository URL: `https://github.com/brunomunizaf/MultiAttributedString.git`
+2. Enter `https://github.com/brunomunizaf/MultiAttributedString.git`
 3. Follow the prompts to complete the installation.
 
 ### Example
@@ -34,7 +34,7 @@ let pairs = [
 let attributedString = NSAttributedString.with("This is $red$ and this is #blue# text.", attributesBetween: pairs)
 ```
 
-In this example, we define symbol pairs (e.g., $ and #) with associated attributes. Then, we create an attributed string using the `NSAttributedString.with(_:attributesBetween:)` method, specifying the input string and the symbol pairs.
+In this example, we define symbol pairs (e.g., `$` and `#`) with associated attributes. Then, we create an attributed string using the `NSAttributedString.with(_:attributesBetween:)` method, specifying the input string and the symbol pairs.
 
 ### Escaping Symbols
 
