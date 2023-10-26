@@ -1,64 +1,52 @@
 import UIKit
 
-public extension NSAttributedString {
+public extension String {
 
-  /// Creates an `NSAttributedString` by applying the specified attributes between given symbol pairs.
+  /// Creates an `NSAttributedString` by applying specified attributes to portions of the string surrounded by specified delimiters.
   ///
-  /// This method allows you to easily stylize parts of a string using symbol delimiters. For example,
-  /// to make the text between '$' symbols red, you would include an attribute with the '$' symbol and a red text color.
+  /// This method offers a convenient way to stylize certain parts of a string by using symbol delimiters. For instance,
+  /// if you want the text between two '$' symbols to appear in red, provide an attribute with the '$' delimiter and a red text color.
   ///
   /// - Parameters:
-  ///   - rawText: The input string containing symbol delimiters to denote areas to be stylized.
-  ///   - pairs: A dictionary where each key is a symbol delimiter and the corresponding value is a set of attributes to apply.
-  /// - Returns: An `NSAttributedString` with the attributes applied based on the symbol delimiters.
-  static func with(
-    _ rawText: String,
-    attributesBetween pairs: [String: ([NSAttributedString.Key: Any])]
-  ) -> NSAttributedString {
+  ///   - rawText: The string containing delimiters that specify which sections should be stylized.
+  ///   - pairs: A dictionary where the key represents a symbol delimiter and its corresponding value denotes the set of attributes to be applied.
+  /// - Returns: An `NSAttributedString` with attributes applied as per the specified delimiters.
+  func applying(attributes: [String: ([NSAttributedString.Key: Any])]) -> NSAttributedString {
+    let mutableAttributedString = NSMutableAttributedString(string: self)
 
-    // Replace any escaped symbols (e.g., \*) with a placeholder to prevent them from being processed.
-    var preprocessedText = rawText
-    for pair in pairs {
-      let escapedSymbol = "\\\(pair.key)"
-      let placeholder = "{\(pair.key)}" // Placeholder to replace escaped symbols.
-      preprocessedText = preprocessedText.replacingOccurrences(of: escapedSymbol, with: placeholder)
-    }
-
-    let mutableAttributedString = NSMutableAttributedString(string: preprocessedText)
-
-    // Use stacks to track the positions of opening and closing symbols.
+    // Stacks to track the positions of starting and ending delimiters.
     var symbolStack: [String] = []
     var startPositionStack: [String.Index] = []
 
-    var currentIndex = preprocessedText.startIndex
+    var currentIndex = self.startIndex
 
-    // Iterate through the string's characters.
-    while currentIndex < preprocessedText.endIndex {
-      let character = preprocessedText[currentIndex]
+    // Traverse each character in the string.
+    while currentIndex < self.endIndex {
+      let character = self[currentIndex]
       let symbol = String(character)
 
-      // If the current character matches a symbol from the pairs...
-      if let pair = pairs.first(where: { $0.key == symbol }) {
+      // If the current character is a delimiter defined in the attributes...
+      if let pair = attributes.first(where: { $0.key == symbol }) {
         if symbolStack.contains(pair.key) {
-          // If it's a closing symbol, pop from the stacks and apply the attributes.
+          // If the symbol is a closing delimiter, retrieve the positions from the stacks and apply the attributes.
           if let lastSymbol = symbolStack.last, lastSymbol == pair.key {
             let start = startPositionStack.removeLast()
-            let range = NSRange(start..<currentIndex, in: preprocessedText)
+            let range = NSRange(start..<currentIndex, in: self)
             mutableAttributedString.addAttributes(pair.value, range: range)
             symbolStack.removeLast()
           }
         } else {
-          // If it's an opening symbol, push its details to the stacks.
+          // If the symbol is an opening delimiter, store its details onto the stacks.
           symbolStack.append(pair.key)
           startPositionStack.append(currentIndex)
         }
       }
-      
-      currentIndex = preprocessedText.index(after: currentIndex)
+
+      currentIndex = self.index(after: currentIndex)
     }
 
-    // Remove the delimiter symbols from the final string.
-    for pair in pairs {
+    // Eliminate the delimiter symbols from the resulting string.
+    for pair in attributes {
       mutableAttributedString.mutableString.replaceOccurrences(
         of: pair.key,
         with: "",
@@ -67,8 +55,8 @@ public extension NSAttributedString {
       )
     }
 
-    // Replace placeholders with their original symbols (e.g., replace "{*}" with "*").
-    for pair in pairs {
+    // Substitute placeholders with the actual delimiters (e.g., replacing "{*}" with "*").
+    for pair in attributes {
       let placeholder = "{\(pair.key)}"
       mutableAttributedString.mutableString.replaceOccurrences(
         of: placeholder,
